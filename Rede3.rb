@@ -1,6 +1,8 @@
 ''' RNA - DNN '''
 
-# Requerir as bibliotecas necessárias
+# Bibliotecas necessárias
+require 'rubygems'
+require 'bundler/setup'
 require 'daru'
 require 'numo/narray'
 require 'dnn'
@@ -13,8 +15,16 @@ require 'gruff'
 require 'numo/linalg'
 
 # Carregar os dados do Excel
-data = Roo::Spreadsheet.open('Varzea.xlsx')
-df1 = Daru::DataFrame.new(data.parse(headers: true))
+data = Roo::Spreadsheet.open('Downloads/Varzea.xlsx')
+sheet = data.sheet(0)
+
+# Extrair valores da planilha e criar um DataFrame
+values = sheet.each_row_streaming(offset: 1).map do |row|
+  row.map { |cell| cell.value.to_f }
+end
+
+# Criar o DataFrame de forma adequada
+df1 = Daru::DataFrame.new({ 'Precipitação' => values.flatten })
 
 # Transformação dos dados
 def min_max_scaler(data)
@@ -118,4 +128,3 @@ r2_test = r2_score(test_y, test_predict.to_a.map(&:first))
 mse_test = mean_squared_error(test_y, test_predict.to_a.map(&:first))
 puts "R² da RNA (teste): #{r2_test}"
 puts "MSE da RNA (teste): #{mse_test}"
-
